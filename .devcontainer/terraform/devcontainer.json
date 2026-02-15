@@ -21,5 +21,7 @@
 				"shardulm94.trailing-spaces"
 			]
 		}
-	}
+	},
+
+	"postCreateCommand": "bash .devcontainer/terraform/setup.sh"
 }
