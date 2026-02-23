@@ -28,6 +28,7 @@ locals {
       user_password     = local.bws_secrets["vm-${hostname}-user-password"]
       root_password     = local.bws_secrets["vm-${hostname}-root-password"]
       user_ssh_pubkey   = local.bws_secrets["vm-${hostname}-user-ssh-public-key"]
+      startup_command   = config.startup_command
     }
   }
 }
@@ -54,6 +55,14 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
       - name: root
         plain_text_passwd: "${each.value.root_password}"
         lock_passwd: false
+
+    runcmd:
+      - |
+        while [ $(free -m | awk '/^Mem:/{print $2}') -lt 1700 ]; do
+          echo "Waiting for RAM to initialize..."
+          sleep 2
+        done
+      - ${each.value.startup_command} --token '${local.bws_secrets["kubernetes-token"]}' --certificate-key '${local.bws_secrets["kubernetes-certificate-key"]}'
     EOF
 
     file_name = "user-config-${each.value.name}.yaml"
