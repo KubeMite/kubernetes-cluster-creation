@@ -36,7 +36,7 @@ variable "virtual_machines" {
     ip                = string
     memory_maximum_mb = optional(number, 4096)
     memory_minimum_mb = optional(number, 2048)
-    startup_command   = string
+    runcmd            = list(string)
   }))
 }
 

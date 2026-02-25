@@ -19,6 +19,11 @@ data "external" "bws_secrets" {
 locals {
   bws_secrets = sensitive(data.external.bws_secrets.result)
 
+  env_vars = {
+    "KUBERNETES_TOKEN"           = local.bws_secrets["kubernetes-token"]
+    "KUBERNETES_CERTIFICATE_KEY" = local.bws_secrets["kubernetes-certificate-key"]
+  }
+
   nodes = {
     for hostname, config in var.virtual_machines : hostname => {
       name              = hostname
@@ -28,7 +33,7 @@ locals {
       user_password     = local.bws_secrets["vm-${hostname}-user-password"]
       root_password     = local.bws_secrets["vm-${hostname}-root-password"]
       user_ssh_pubkey   = local.bws_secrets["vm-${hostname}-user-ssh-public-key"]
-      startup_command   = config.startup_command
+      runcmd            = config.runcmd
     }
   }
 }
@@ -57,12 +62,12 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
         lock_passwd: false
 
     runcmd:
-      - |
-        while [ $(free -m | awk '/^Mem:/{print $2}') -lt 1700 ]; do
-          echo "Waiting for RAM to initialize..."
-          sleep 2
-        done
-      - ${each.value.startup_command} --token '${local.bws_secrets["kubernetes-token"]}' --certificate-key '${local.bws_secrets["kubernetes-certificate-key"]}'
+      %{for key, value in local.env_vars}
+      - export ${key}=${jsonencode(value)}
+      %{endfor}
+      %{for command in each.value.runcmd}
+      - ${command}
+      %{endfor}
     EOF
 
     file_name = "user-config-${each.value.name}.yaml"
