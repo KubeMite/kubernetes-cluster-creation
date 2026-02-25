@@ -106,7 +106,7 @@ resource "proxmox_virtual_environment_vm" "node" {
   }
 
   clone {
-    vm_id = 102
+    vm_id = 101
     full  = false
   }
 
