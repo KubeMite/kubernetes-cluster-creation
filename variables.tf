@@ -33,11 +33,10 @@ variable "proxmox_node_name" {
 variable "virtual_machines" {
   description = "Map of virtual machines to create. The key is the hostname. Passwords and SSH keys are fetched from Bitwarden."
   type = map(object({
-    ip                = string
-    memory_maximum_mb = optional(number, 4096)
-    memory_minimum_mb = optional(number, 2048)
-    runcmd            = list(string)
-    vmid              = number
+    ip        = string
+    memory_mb = optional(number, 4096)
+    runcmd    = list(string)
+    vmid      = number
   }))
 }
 

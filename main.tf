@@ -26,15 +26,14 @@ locals {
 
   nodes = {
     for hostname, config in var.virtual_machines : hostname => {
-      name              = hostname
-      ip                = config.ip
-      vmid              = config.vmid
-      memory_maximum_mb = config.memory_maximum_mb
-      memory_minimum_mb = config.memory_minimum_mb
-      user_password     = local.bws_secrets["vm-${hostname}-user-password"]
-      root_password     = local.bws_secrets["vm-${hostname}-root-password"]
-      user_ssh_pubkey   = local.bws_secrets["vm-${hostname}-user-ssh-public-key"]
-      runcmd            = config.runcmd
+      name            = hostname
+      ip              = config.ip
+      vmid            = config.vmid
+      memory_mb       = config.memory_mb
+      user_password   = local.bws_secrets["vm-${hostname}-user-password"]
+      root_password   = local.bws_secrets["vm-${hostname}-root-password"]
+      user_ssh_pubkey = local.bws_secrets["vm-${hostname}-user-ssh-public-key"]
+      runcmd          = config.runcmd
     }
   }
 }
@@ -113,8 +112,8 @@ resource "proxmox_virtual_environment_vm" "node" {
   }
 
   memory {
-    dedicated = tonumber("${each.value.memory_maximum_mb}")
-    floating  = tonumber("${each.value.memory_minimum_mb}")
+    dedicated = tonumber("${each.value.memory_mb}")
+    floating  = tonumber("${each.value.memory_mb}")
   }
 
   clone {
