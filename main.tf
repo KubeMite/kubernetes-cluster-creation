@@ -63,7 +63,7 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
 
     runcmd:
       %{for key, value in local.env_vars}
-      - export ${key}=${jsonencode(value)}
+      - export '${key}'='${value}'
       %{endfor}
       %{for command in each.value.runcmd}
       - ${command}
