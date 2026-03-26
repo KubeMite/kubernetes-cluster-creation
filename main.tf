@@ -136,3 +136,49 @@ resource "proxmox_virtual_environment_vm" "node" {
     network_data_file_id = proxmox_virtual_environment_file.network_data_cloud_config[each.value.name].id
   }
 }
+
+resource "terraform_data" "fetch_kubeconfig" {
+  depends_on = [proxmox_virtual_environment_vm.node]
+
+  provisioner "local-exec" {
+    environment = {
+      "SUDO_PASSWORD" = local.bws_secrets["vm-host01-user-password"]
+    }
+
+    command = <<EOT
+      echo '${local.bws_secrets["vm-host01-user-ssh-private-key"]}' > host01_ssh_key
+      chmod 600 host01_ssh_key
+
+      echo "Waiting for Kubernetes to initialize on host01..."
+
+      for i in {1..150}; do
+
+        if printf "%s\n" "$SUDO_PASSWORD" | ssh -o StrictHostKeyChecking=no \
+           -o UserKnownHostsFile=/dev/null \
+           -i host01_ssh_key user@${local.nodes["host01"].ip} \
+           "sudo -S ls /etc/kubernetes/admin.conf" >/dev/null 2>&1; then
+
+          echo "File found! Copying to ~/.kube/config..."
+
+          printf "%s\n" "$SUDO_PASSWORD" | ssh -o StrictHostKeyChecking=no -o \
+          UserKnownHostsFile=/dev/null \
+          -i host01_ssh_key user@${local.nodes["host01"].ip} \
+          "sudo -S cat /etc/kubernetes/admin.conf" > ~/.kube/config
+
+          SUCCESS=true
+          break
+        fi
+
+        echo "Attempt $i: File not ready yet. Retrying in 2s..."
+        sleep 2
+      done
+
+      rm host01_ssh_key
+
+      if [ "$SUCCESS" != true ]; then
+        echo "Error: Timed out waiting for /etc/kubernetes/admin.conf"
+        exit 1
+      fi
+    EOT
+  }
+}

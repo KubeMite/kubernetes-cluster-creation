@@ -4,6 +4,10 @@
 	"name": "Terraform",
 	"image": "ubuntu:24.04",
 
+	"mounts": [
+		"source=${localEnv:HOME}/.kube,target=/root/.kube,type=bind"
+	],
+
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
 		"ghcr.io/devcontainers/features/git:1": {},
@@ -25,5 +29,5 @@
 		}
 	},
 
-	"postCreateCommand": "bash .devcontainer/terraform/setup.sh"
+	"postCreateCommand": "bash .devcontainer/terraform/setup.sh && apt-get install openssh-client -y"
 }

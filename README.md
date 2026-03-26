@@ -19,6 +19,7 @@ terraform validate
 Run the code:
 ```sh
 terraform apply -auto-approve \
+    -replace="terraform_data.fetch_kubeconfig" \
     -replace="proxmox_virtual_environment_vm.node[\"host01\"]" \
     -replace="proxmox_virtual_environment_vm.node[\"host02\"]" \
     -replace="proxmox_virtual_environment_vm.node[\"host03\"]" \
