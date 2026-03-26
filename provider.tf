@@ -6,11 +6,11 @@ terraform {
     }
     proxmox = {
       source  = "bpg/proxmox"
-      version = "0.94.0"
+      version = "0.99.0"
     }
   }
 
-  required_version = "~> 1.14.5"
+  required_version = "~> 1.14.8"
 }
 
 provider "proxmox" {
