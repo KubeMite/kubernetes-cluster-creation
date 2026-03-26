@@ -113,6 +113,10 @@ resource "proxmox_virtual_environment_vm" "node" {
   name      = each.key
   vm_id     = each.value.vmid
 
+  lifecycle {
+    create_before_destroy = false
+  }
+
   smbios {
     serial = "h=pve;i=${each.value.vmid}"
   }

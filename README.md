@@ -18,5 +18,11 @@ terraform validate
 ```
 Run the code:
 ```sh
-terraform apply
+terraform apply -auto-approve \
+    -replace="proxmox_virtual_environment_vm.node[\"host01\"]" \
+    -replace="proxmox_virtual_environment_vm.node[\"host02\"]" \
+    -replace="proxmox_virtual_environment_vm.node[\"host03\"]" \
+    -replace="proxmox_virtual_environment_vm.node[\"host04\"]" \
+    -replace="proxmox_virtual_environment_vm.node[\"host05\"]" \
+    -replace="proxmox_virtual_environment_vm.node[\"host06\"]"
 ```
